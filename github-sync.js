@@ -26,7 +26,7 @@ const argv = require('yargs/yargs')(process.argv.slice(2))
       alias: 't',
       array: true,
       describe: 'target repositories',
-      demandOption: true
+      demandOption: false
     },
     'token': {
       describe: 'github token. Use source-token or target-token to set different tokens for source and target',
@@ -48,6 +48,10 @@ const argv = require('yargs/yargs')(process.argv.slice(2))
     'dry-run': {
       type: 'boolean',
       describe: 'log changes - do not write'
+    },
+    'get-only': {
+      type: 'boolean',
+      describe: 'only get data - do not write'
     },
     'update-only': {
       type: 'boolean',
@@ -225,6 +229,10 @@ async function syncLabels(argv) {
   labels = filterByRegExpList(labels, argv.list, "name")
   console.log("Source labels:");
   console.log(JSON.stringify(labels.map((l) => { return { name: l.name, description: l.description, color: l.color } })));
+
+  if (argv.getOnly) {
+    return;
+  }
 
   let octokit = new Octokit({ baseUrl: argv.targetBaseUrl || argv.baseUrl, auth: argv.targetToken || argv.token });
   let targets = await readTargets(argv, octokit);
